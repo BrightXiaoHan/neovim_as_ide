@@ -8,7 +8,7 @@ call vundle#begin()
 "call vundle#begin('~/some/path/here')
 
 " let Vundle manage Vundle, required
-" Plugin 'VundleVim/Vundle.vim'
+Plugin 'VundleVim/Vundle.vim'
 
 " The following are examples of different formats supported.
 " Keep Plugin commands between vundle#begin/end.
@@ -31,18 +31,27 @@ Plugin 'sonph/onehalf', {'rtp': 'vim/'}  " onehalf 主题配色插件
 " Markdown 相关插件
 Plugin 'godlygeek/tabular'
 Plugin 'plasticboy/vim-markdown'
+"图标插件
+Plugin 'ryanoasis/vim-devicons'
 " 状态栏插件
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 " Git相关插件
 Plugin 'tpope/vim-fugitive'
+Plugin 'mhinz/vim-signify'
 " 自动补全插件
 Plugin 'valloric/youcompleteme'
 " NERDTree插件
 Plugin 'preservim/nerdtree'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
+" 自动生成索引插件
+Plugin 'ludovicchabant/vim-gutentags'
 " 语法检查插件
-Plugin 'scrooloose/syntastic'
-
+Plugin 'dense-analysis/ale'
+" 括号引号自动补全插件
+Plugin 'jiangmiao/auto-pairs'
+" 文件快速切换
+Plugin 'yggdroot/leaderf'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -74,35 +83,63 @@ set expandtab
 let g:auto_save = 1  " enable AutoSave on Vim startup
 let g:auto_save_silent = 1  " do not display the auto-save notification
 
+" 强制显示侧边栏
+set signcolumn=yes
+
+inoremap jk <ESC>
+
 " 颜色主题onehalf配置
 syntax on
 set t_Co=256
 set cursorline
 colorscheme onehalfdark
-let g:airline_theme='onehalflight'
-" lightline
-" let g:lightline.colorscheme='onehalfdark'
+let g:airline_theme='onehalfdark'
 
-set splitbelow " 设置Preview窗口出现自下方
+" YouCompleteMe的相关配置
+let g:ycm_add_preview_to_completeopt = 0
+let g:ycm_show_diagnostics_ui = 0
+let g:ycm_server_log_level = 'info'
+let g:ycm_min_num_identifier_candidate_chars = 2
+let g:ycm_collect_identifiers_from_comments_and_strings = 1
+let g:ycm_complete_in_strings=1
+let g:ycm_key_invoke_completion = '<c-z>'
+set completeopt=menu,menuone
+noremap <c-z> <NOP>
+let g:ycm_semantic_triggers =  {
+			\ 'c,cpp,python,java,go,erlang,perl': ['re!\w{2}'],
+			\ 'cs,lua,javascript': ['re!\w{2}'],
+			\ }
 
 " 配置NERDTree
 map <C-n> :NERDTreeToggle<CR> " ctrl + n 开启和关闭文件树
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif " 当只剩下NERDTree一个窗口时自动关闭vim
+" 配置忽略文件
+let NERDTreeIgnore = ['\.pyc$', '__pycache__', '\.git']
 
-function! NERDTreeHighlightFile(extension, fg, bg, guifg, guibg)
-    exec 'autocmd filetype nerdtree highlight ' . a:extension .' ctermbg='. a:bg .' ctermfg='. a:fg .' guibg='. a:guibg .' guifg='. a:guifg
-    exec 'autocmd filetype nerdtree syn match ' . a:extension .' #^\s\+.*'. a:extension .'$#'
-endfunction
-call NERDTreeHighlightFile('jade', 'green', 'none', 'green', '#151515')
-call NERDTreeHighlightFile('ini', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('md', 'blue', 'none', '#3366FF', '#151515')
-call NERDTreeHighlightFile('yml', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('config', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('conf', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('json', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('cpp', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('py', 'cyan', 'none', 'cyan', '#151515')
-call NERDTreeHighlightFile('cc', 'cyan', 'none', 'cyan', '#151515')
-call NERDTreeHighlightFile('h', 'Red', 'none', 'red', '#151515')
-call NERDTreeHighlightFile('cu', 'Red', 'none', '#ffa500', '#151515')
-call NERDTreeHighlightFile('sh', 'Magenta', 'none', '#ff00ff', '#151515')
+" 配置自动索引插件vim-gutentags
+" gutentags 搜索工程目录的标志，碰到这些文件/目录名就停止向上一级目录递归
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.hg', '.project']
+" 所生成的数据文件的名称
+let g:gutentags_ctags_tagfile = '.tags'
+" 将自动生成的 tags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录
+let s:vim_tags = expand('~/.cache/tags')
+let g:gutentags_cache_dir = s:vim_tags
+" 配置 ctags 的参数
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+px']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+
+" ALE配置
+let g:ale_linters = {
+\   'python': ['flake8'],
+\   'c++': ['clang'],
+\   'c': ['clang'],
+\}
+let g:ale_fixers = {
+\   'python': ['autopep8', 'yapf'],
+\   'c++': ['clang-format', 'clangtidy', 'uncrustify'],
+\}
+
+" LeaderF配置
+let g:Lf_WindowPosition = 'popup' " 设置悬浮窗显示
+let g:Lf_PreviewInPopup = 1
