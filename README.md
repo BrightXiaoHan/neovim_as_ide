@@ -52,11 +52,29 @@ neovim默认配置是不显示行号的，如果要nvim显示行号，需要在n
 set number 
 ```
 
+### 插件管理器vim-plug
+这是比较基本的一个东西，如今 Vim 下熟练开发的人，基本上手都有 20-50 个插件，遥想十年前，Vim里常用的插件一只手都数得过来。过去我一直使用老牌的 Vundle 来管理插件，但是随着插件越来越多，更新越来越频繁，Vundle 这种每次更新就要好几分钟的东西实在是不堪重负了，在我逐步对 Vundle 失去耐心之后，我试用了 vim-plug ，用了两天以后就再也回不去 Vundle了，它支持全异步的插件安装，安装50个插件只需要一分钟不到的时间，这在 Vundle 下面根本不可想像的事情，插件更新也很快，不像原来每次更新都可以去喝杯茶去，最重要的是它支持插件延迟加载。抛弃 Vundle 切换到 vim-plug 以后，不仅插件安装和更新快了一个数量级，大量的插件我都配置成了延迟加载，Vim 启动速度比 Vundle 时候提高了不少。使用 Vundle 的时候一旦插件数量超过30个，管理是一件很痛苦的事情，而用了 vim-plug 以后，50-60个插件都轻轻松松。
+```sh
+curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \\n    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+```
+在你的.config/nvim/init.vim中添加如下内容
+```vim
+" Specify a directory for plugins
+" - For Neovim: stdpath('data') . '/plugged'
+" - Avoid using standard Vim directory names like 'plugin'
+call plug#begin('~/.vim/plugged')
+" Put your plugins here
+
+" Initialize plugin system
+call plug#end()
+```
+打开nvim，在普通模式下输入```:PluginInstall```安装所有插件。
+
 ### 括号自动补全以及tab键跳出括号
 很多现代 IDE 都有自动补全配对括号的功能，比如输入了左括号“(”，IDE 就自动在后面添加一个对应的右括号“)”，并且将光标移到括号中间
 除了括号的自动补全，有时我们也需要括号的自动删除。比如在输入了左括号后突然发现输错了，本来只需要简单地按一下退格键，将刚才输入的左括号删除就行了，但现在 VIM 自动加了一个右括号，退格键只能删除左括号，这个自动加上右括号还得按一下 DELETE 键才能删掉。所以，我们还需要一个功能，如果按退格键删除了左括号，那么也要自动地把对应的右括号删除。我综合比较了自己配置和各种插件，觉得[auto-pairs](https://github.com/jiangmiao/auto-pairs)用起来最顺手，bug最少。
 ```vim
-Plugin 'jiangmiao/auto-pairs'
+Plug'jiangmiao/auto-pairs'
 ```
 另外，在自动补全了右括号之后，如果用户再输入右括号会怎么样呢？一般来说，比较合理的做法似乎是忽略掉这个后输入的多余的右括号，直接将光标向右移到一格。
 eclipse当中有一个很给力的设定，括号自动匹配后，可以使用tab来跳出括号，这无疑比右手整个移动到方向键区按右方向键来的快多了。目前我没有找到好的插件来实现这个功能，我们可以自定义一个函数来实现
@@ -73,63 +91,10 @@ endfunc
 inoremap <TAB> <c-r>=SkipPair()<CR>
 ```
 
-### 插件管理器Vundle
-克隆Vundle到~/.vim/bundle/Vundle.vim
-```sh
-git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-```
-在你的.config/nvim/init.vim中添加如下内容，内容中的Plugin示范了所有可接受的格式，如果不需要可以将他们移除。以下内容放在配置文件的最前面。
-```vim
-set nocompatible              " be iMproved, required
-filetype off                  " required
-
-" set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-" alternatively, pass a path where Vundle should install plugins
-"call vundle#begin('~/some/path/here')
-
-" let Vundle manage Vundle, required
-Plugin 'VundleVim/Vundle.vim'
-
-" The following are examples of different formats supported.
-" Keep Plugin commands between vundle#begin/end.
-" plugin on GitHub repo
-Plugin 'tpope/vim-fugitive'
-" plugin from http://vim-scripts.org/vim/scripts.html
-" Plugin 'L9'
-" Git plugin not hosted on GitHub
-Plugin 'git://git.wincent.com/command-t.git'
-" git repos on your local machine (i.e. when working on your own plugin)
-Plugin 'file:///home/gmarik/path/to/plugin'
-" The sparkup vim script is in a subdirectory of this repo called vim.
-" Pass the path to set the runtimepath properly.
-Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
-" Install L9 and avoid a Naming conflict if you've already installed a
-" different version somewhere else.
-" Plugin 'ascenator/L9', {'name': 'newL9'}
-
-" All of your Plugins must be added before the following line
-call vundle#end()            " required
-filetype plugin indent on    " required
-" To ignore plugin indent changes, instead use:
-"filetype plugin on
-"
-" Brief help
-" :PluginList       - lists configured plugins
-" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
-" :PluginSearch foo - searches for foo; append `!` to refresh local cache
-" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
-"
-" see :h vundle for more details or wiki for FAQ
-" Put your non-Plugin stuff after this line
-```
-打开nvim，在普通模式下输入```:PluginInstall```安装所有插件。也可以再命令行下执行```vim +PluginInstall +qall```
-
 ### 配置自动保存
 使用Vundle安装 auto-save插件
 ```vim
-Plugin '907th/vim-auto-save'
+Plug '907th/vim-auto-save'
 ```
 配置自动保存
 ```vim
@@ -141,7 +106,7 @@ let g:auto_save_silent = 1  " do not display the auto-save notification
 [onehalf](https://github.com/sonph/onehalf/tree/master/vim)，NeoVim + Tmux with true colors on iTerm2。我最钟情的一个配色主题。使用vundle安装：
 
 ```vim
-Plugin 'sonph/onehalf', {'rtp': 'vim/'}
+Plug 'sonph/onehalf', {'rtp': 'vim/'}
 ```
 安装后进行颜色主题的配置
 ```vim
@@ -159,8 +124,8 @@ let g:airline_theme='onehalfdark'
 ### 打造一个漂亮的状态栏
 [vimairline](https://github.com/vim-airline/vim-airline)，使用vundle安装
 ```vim
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 ```
 其中第一个插件为状态栏插件，第二个是状态栏的一些配色主题，在normal模式下可以自由切换状态栏主题配色
 ```
@@ -172,7 +137,7 @@ Plugin 'vim-airline/vim-airline-themes'
 ### 集成Git
 [fugitive](https://vimawesome.com/plugin/fugitive-vim)，使用vundle安装
 ```vim
-Plugin 'tpope/vim-fugitive'
+Plug 'tpope/vim-fugitive'
 ```
 安装完成后，你可以在normal模式下执行一些Git的命令，如
 ```
@@ -184,14 +149,14 @@ Plugin 'tpope/vim-fugitive'
 这是个小功能，在侧边栏显示一个修改状态，对比当前文本和 git/svn 仓库里的版本，在侧边栏显示修改情况，以前 Vim 做不到实时显示修改状态，如今推荐使用 vim-signify 来实时显示修改状态，它比 gitgutter 强，除了 git 外还支持 svn/mercurial/cvs 等十多种主流版本管理系统。没注意到它时，你可能觉得它不存在，当你有时真的看上两眼时，你会发现这个功能很贴心。最新版 signify 还有一个命令:SignifyDiff，可以左右分屏对比提交前后记录，比你命令行 svn/git diff 半天直观多了。并且对我这种同时工作在 subversion 和 git 环境下的情况契合的比较好。Signify 和前面的 ALE 都会在侧边栏显示一些标记，默认侧边栏会自动隐藏，有内容才会显示，不喜欢侧边栏时有时无的行为可设置强制显示侧边栏：`set signcolumn=yes` 。
 使用vundle安装
 ```vim
-Plugin 'mhinz/vim-signify'
+Plug 'mhinz/vim-signify'
 ```
 
 ### 自动补全插件
 [YouCompleteMe]()插件支持补全C++、Python等各种语言，vim下最流行的自动补全插件
 使用vundle安装
 ```
-Plugin 'valloric/youcompleteme'
+Plug 'valloric/youcompleteme'
 ```
 进入`~/.vim/bundle/YouCompleteMe`目录，安装python，c++的补全服务
 ```
@@ -225,7 +190,7 @@ let g:ycm_semantic_triggers =  {
 [nerdtree](https://github.com/preservim/nerdtree)插件可以使vim像ide一样显示树形文件目录结构。
 使用vundle安装
 ```vim
-Plugin 'preservim/nerdtree'
+Plug 'preservim/nerdtree'
 ```
 默认情况下，我们需要输入`:NERDTree`来打开文件树，我们可以为此配置一个快捷键 `ctrl + n`
 ```vim
@@ -241,14 +206,14 @@ let NERDTreeIgnore = ['\.pyc$', '__pycache__', '\.git']
 ```
 这里推荐一个很好用的插件 nerdtree-git-plugin，在nerdtree的配合下这个插件能显示 git 管理的项目文件变更状态。
 ```vim
-Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plug 'Xuyuanp/nerdtree-git-plugin'
 ```
 
 ### 美化Nerdtree
 nerdtree默认显示的事没有感情的剪头，下面我们来介绍如何让nerdtree不同的文件类型显示不同的图标。
 首先安装 (vim-devicons)[https://github.com/ryanoasis/vim-devicons]插件
 ```vim
-Plugin 'ryanoasis/vim-devicons'
+Plug 'ryanoasis/vim-devicons'
 ```
 除此之外，我们还要安装一种可以显示图标的字体，我们可以参考[nerd font](https://github.com/ryanoasis/nerd-fonts#font-patcher)去安装字体，然后在我们的终端配置相应的字体就可以了。
 
@@ -274,7 +239,7 @@ ctrl t 或 ctrl o # 返回
 
 使用vundle安装
 ```vim
-Plugin 'ludovicchabant/vim-gutentags'
+Plug 'ludovicchabant/vim-gutentags'
 ```
 
 vim-gutentags 需要简单配置一下：
@@ -298,7 +263,7 @@ let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
 ### 语法检查
 代码检查是个好东西，让你在编辑文字的同时就帮你把潜在错误标注出来，不用等到编译或者运行了才发现。网上很多人推syntastic，这是一个老的语法检查插件，它的一大缺点就是无法进行实时检查。只有当你保存文件才运行检查器，所以请用实时 linting 工具 [ALE](https://github.com/dense-analysis/ale)：
 ```vim
-Plugin 'dense-analysis/ale'
+Plug 'dense-analysis/ale'
 ```
 配置python，我们使用flake8作为语法检查器而不是Pylint，Pylint对于语法的检查过于严格，甚至是有些多余，这个就看个人的需求与喜好了。
 ```vim
@@ -319,5 +284,5 @@ let g:ale_fixers = {
 文件/buffer模糊匹配快速切换的方式，比你打开一个对话框选择文件便捷不少，过去我们常用的 CtrlP 可以光荣下岗了，如今有更多速度更快，匹配更精准以及完美支持后台运行方式的文件模糊匹配工具。我自己用的是上面提到的 LeaderF，除了提供函数列表外，还支持文件，MRU，Buffer名称搜索，完美代替 CtrlP。
 LeaderF 是目前匹配效率最高的，高过 CtrlP/Fzf 不少，敲更少的字母就能把文件找出来，同时搜索很迅速，使用 Python 后台线程进行搜索匹配，还有一个 C模块可以加速匹配性能，需要手工编译下。LeaderF在模糊匹配模式下按 TAB 可以切换到匹配结果窗口用光标或者 Vim 搜索命令进一步筛选，这是 CtrlP/Fzf 不具备的，更多方便的功能见它的官方文档。
 ```vim
-Plugin 'yggdroot/leaderf'
+Plug 'yggdroot/leaderf'
 ```
