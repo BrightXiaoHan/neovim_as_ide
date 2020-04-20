@@ -29,7 +29,21 @@ Plug 'dense-analysis/ale'
 Plug 'jiangmiao/auto-pairs'
 " 文件快速切换
 Plug 'yggdroot/leaderf'"
+" 语法高亮显示增强
+Plug 'sheerun/vim-polyglot'
+" python mode
+Plug 'klen/python-mode'
+" terminal help
+Plug 'voldikss/vim-floaterm'
+" 异步任务执行插件
+Plug 'skywind3000/asynctasks.vim'
+Plug 'skywind3000/asyncrun.vim'
 
+" 测试插件
+Plug 'janko-m/vim-test'
+
+" 即时运行插件
+Plug 'thinca/vim-quickrun'
 " Initialize plugin system
 call plug#end()
 
@@ -52,7 +66,12 @@ let g:auto_save_silent = 1  " do not display the auto-save notification
 " 强制显示侧边栏
 set signcolumn=yes
 
+" 设置jk键为退出边界模式
 inoremap jk <ESC>
+
+" 设置leader键为空格
+let mapleader = "\<space>"
+
 
 " 颜色主题onehalf配置
 syntax on
@@ -109,3 +128,15 @@ let g:ale_fixers = {
 " LeaderF配置
 let g:Lf_WindowPosition = 'popup' " 设置悬浮窗显示
 let g:Lf_PreviewInPopup = 1
+
+" floaterm 配置
+let g:floaterm_keymap_new    = '<leader>n'
+let g:floaterm_keymap_next   = '<leader><tab>'
+let g:floaterm_keymap_toggle = '<leader>w'
+" Set floaterm window's background to black
+hi FloatermNF guibg=black
+" " Set floating window border line color to cyan, and background to orange
+hi FloatermBorderNF guibg=orange guifg=cyan
+
+" AsyncRun AsyncTask 配置
+let g:asynctasks_term_pos = "floaterm"
